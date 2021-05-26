@@ -45,7 +45,7 @@ def update():
         if i==0:
             db.sentences.update_one(
                 {"ID": id},
-                { "$inc": { "vote": 1, "relevence": user_score} }
+                { "$inc": { "vote": 1, "relevance": user_score} }
             )
         db.sentences.update_one(
                 {"ID": id},
