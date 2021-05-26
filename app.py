@@ -1,5 +1,8 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, flash, session
 from pymongo import MongoClient
+import random
+import json
+from bson import json_util
 
 
 # config system
@@ -7,33 +10,20 @@ app = Flask(__name__)
 app.config.update(dict(SECRET_KEY='yoursecretkey'))
 client = MongoClient('localhost:27017')
 db = client.ner_corpus
-
-class utils:
-    def __init__(self):
-        self.it = 0
-        self.type = "start"
-        self.data = []
-        self.num_sents_display = 2
-    def get_data(self, lang):
-        print(lang)
-        docs = db.sentences.find({'lang':lang})
-        for i in docs:
-            self.data.append(i)
-        print(len(self.data))
-        self.data = sorted(self.data, key=lambda item: item['vote'])[:self.num_sents_display]
-        # print(self.data)
-        self.it = 0
-    def increment(self):
-        while self.it < len(self.data) - 1:
-            self.it += 1
-            i = self.data[self.it]
-            return i
-        return None
-
-util = utils()
-
+num_sents_display = 5
 tag_id_map = {0:'B-PER', 1:'I-PER', 2:'B-LOC', 3:'I-LOC', 4:'B-ORG', 5:'I-ORG', 6:'B-MISC', 7:'I-MISC', 8:'O'}
-    
+
+def fetch_data(lang):
+    docs = db.sentences.find({'lang':lang})
+    docs = json.loads(json_util.dumps(docs))
+    data = []
+    for i in docs:
+        data.append(i)
+    # print(data)
+    data = sorted(data, key=lambda item: item['vote'])[:num_sents_display]
+    random.shuffle(data)
+    return data
+  
 
 @app.route("/update/<int:id>", methods=['GET'])
 def updateLabel(id):
@@ -61,23 +51,34 @@ def update():
                 {"ID": id},
                 { "$set": { f"words.{i}.votes": upd_votes} }
             )
-    
-    if util.increment():
-        return redirect(f"/update/{util.data[util.it]['ID']}")
-    util.data = []
-    return redirect('/')
-
+    next = True if 'next' in request.form.keys() else False
+    if next:
+        session['curr_it'] += 1
+        print(f"Sentence: {session['curr_it']+1}/{session['num_it']}")
+        if session['curr_it'] < session['num_it']:
+            flash(f"Sentence: {session['curr_it']+1}/{session['num_it']}", "warning")
+            return redirect(f"/update/{session['data'][session['curr_it']]['ID']}")
+        else:
+            flash("You have successfully finished annotating!", "success")
+            return redirect("/")
+    else:
+        flash("Your previous session ended! All annotations were saved.", "success")
+        return redirect("/")
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
     if request.method == 'POST':
         lang = request.form['lang']
-        util.get_data(lang)
-        if util.data:
-            return redirect(f"/update/{util.data[0]['ID']}")
+        session['data'] = fetch_data(lang)
+        session['num_it'] = len(session['data'])
+        session['curr_it'] = 0
+        if session['num_it']:
+            print(f"Sentence: {session['curr_it']+1}/{session['num_it']}")
+            return redirect(f"/update/{session['data'][session['curr_it']]['ID']}")
         else:
-            return render_template('home.html', back=lang)
-    return render_template('home.html', back="")
+            flash(f"No sentences available for selected language: {lang}!", "danger")
+            return render_template('home.html')
+    return render_template('home.html')
 
 
 if __name__== '__main__':

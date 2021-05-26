@@ -27,26 +27,41 @@
 
     body {
       padding: 2em;
+      padding-right: 4em;
     }
 
     .w {
-      background-color: blueviolet
+      background-color: rgb(210, 181, 238)
     }
 
     .x {
-      background-color: orangered
+      background-color: rgb(241, 150, 116)
     }
 
     .y {
-      background-color: Yellow
+      background-color: rgba(240, 240, 105, 0.911)
     }
 
     .z {
-      background-color: SeaGreen
+      background-color: rgba(136, 240, 181, 0.705)
     }
 
     .zz {
       background-color: gainsboro;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      display: none;
+    }
+
+    .back-to-bot {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: none;
     }
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
@@ -57,6 +72,7 @@
     integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <div class="head">
     <h1>NE TAG ASSIGNMENT</h1>
   </div>
@@ -78,9 +94,47 @@
         var selectedItem = $(this).find("option:selected");
         $(this).css('backgroundColor', selectedItem.css('backgroundColor'));
       });
-    }});
+    }
+    $(window).scroll(function () {
+      if ($(this).scrollTop() > 50) {
+        $('#back-to-top').fadeIn();
+        $('#back-to-bot').fadeOut();
+      } else {
+        $('#back-to-top').fadeOut();
+        $('#back-to-bot').fadeIn();
+      }
+    });
+    // scroll body to 0px on click
+    $('#back-to-top').click(function () {
+      $('body,html').animate({
+        scrollTop: 0
+      }, 400);
+      return false;
+    });
+    $('#back-to-bot').click(function () {
+      $('body,html').animate({
+        scrollTop: document.body.scrollHeight
+      }, 400);
+      return false;
+    });  
+  });
   </script>
-  <h4>ID #{{ id }}</h4> <br>
+  <br>
+  <a id="back-to-top" href="#" class="btn btn-info back-to-top"><i class="fa fa-chevron-up"></i></a>
+  <a id="back-to-bot" href="#" class="btn btn-info back-to-bot"><i class="fa fa-chevron-down"></i></a>
+  <!-- <h4>ID #{{ id }}</h4> <br> -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    <span>{{ message }}</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
   <form action="/update" method="POST">
     <input type="hidden" name="id" value="{{ id }}">
     <div class="card-deck">
@@ -107,12 +161,17 @@
       {% endfor %}
     </div>
     <div class="head">
-      <select id="score" class="btn btn-dark dropdown-toggle" name="score">
-        <option value="1">Score: 1</option>
-        <option value="-1">Score: -1</option>
-      </select>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <input class="btn btn-success" style="cursor:pointer" id="submit" type="submit" name="submit" value="Done">
+      <button type="submit" class="btn btn-danger" style="cursor:pointer" name="home"
+        onclick="return confirm('This will end the current session and redirect you to Home Page!');">
+        << Back to Home</button>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <select id="score" class="btn btn-dark dropdown-toggle" name="score">
+            <option value="1">Relevance Score: 1</option>
+            <option value="-1">Relevance Score: -1</option>
+          </select>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <input class="btn btn-success" style="cursor:pointer" id="submit" type="submit" name="next"
+            value="Next >"></a>
     </div>
   </form>
 </body>

@@ -13,12 +13,13 @@
     .card {
       font-size: 20;
       display: inline;
-      text-align: center;
-      padding: 2em;
+      padding: 1em;
     }
 
-    .card-block {
-      word-wrap: break-word;
+    .card-bottom {
+      font-size: 20;
+      display: inline;
+      text-align: center;
     }
 
     body {
@@ -49,53 +50,50 @@
 </head>
 
 <body>
-  <br><br>
-  {% if back %}
-  <div class="alert alert-danger"">
-    <p>No sentences available for language: {{ back }}!</p>
+  <br>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    <span>{{ message }}</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
+  {% endfor %}
   {% endif %}
+  {% endwith %}
   <div class="card">
-    <p>We have generated NER tags for some sentences.<br>
-    Every word/punctuation in the sentence is displayed with the generated tag.<br>
-    We request you to check the correctness of the tag, and if needed change tags using the drop down menu.<br>
-    Once you are done choosing tags, click the <strong> Done button </strong> to load the next sentence.<br>
-    You will be supplied with 20 sentences to tag. Your response is appreciated<br>
-    Click <strong>Start</strong> to begin!</p>
-    <br>
-    <form class="form-horizontal" action="/" method="POST">
-          <label for="#dropdown">Preferred Language: </label>
-            <select id="dropdown" name="lang" required>
-              <option disabled selected value>Select language</option>
-              <option value="hin">Hindi</option>
-              <option value="ben">Bengali</option>
-              <option value="mar">Marathi</option>
-              <option value="tam">Tamil</option>
-            </select>
+    <strong>Instructions</strong>
+    <ul>
+      <li>We have generated NER tags for some sentences.</li>
+      <li>You will be supplied with 20 sentences to annotate. Your response is appreciated</li>
+      <li>Every word/punctuation in the sentence is displayed with the generated tag.</li>
+      <li>We request you to check the correctness of the tag, and if needed change the tags using the drop down menus.
+      </li>
+      <li>In case you find that the sentence is not relevant, you can assign a <strong> Relevance Score </strong> of -1
+        in the dropdown at the end.</li>
+      <li>Once you are done choosing tags, click the <strong> Next </strong> button to load the next sentence.</li>
+      <li>Finally, you can terminate the session anytime by clicking the <strong> Back to Home </strong> button. All
+        your annotations upto that point will be recorded.</li>
+      <li>Click <strong>Start</strong> to begin!</li>
+    </ul>
+    <div class="card-bottom">
+      <form class="form-horizontal" action="/" method="POST">
+        <label for="#dropdown">Preferred Language: </label>
+        <select id="dropdown" name="lang" required>
+          <option disabled selected value>Select language</option>
+          <option value="hin">Hindi</option>
+          <option value="ben">Bengali</option>
+          <option value="mar">Marathi</option>
+          <option value="tam">Tamil</option>
+        </select>
         <br> <br>
-      <input class="btn btn-primary btn-lg" style= "cursor:pointer" id="start" type="submit" name="start" value="Start">
-    </form>
+        <input class="btn btn-primary btn-lg" style="cursor:pointer" id="start" type="submit" name="start"
+          value="Start">
+      </form>
+    </div>
   </div>
-
-  <!-- <br>
-    <br>
-    <b>Sentence:</b><br><br>
-    <p>
-    {% for i in data %}
-        ID: {{ i["ID"] }} <br>
-        length: {{ i["len"] }}<br>
-        <div class="card-deck">
-        {% for j in i["words"] %}
-            <div class="card">
-              <div class="card-block">
-                <p class="card-text">{{ j["word"] }}</p>
-                <p class="card-text"><small class="text-muted">{{ tag_id_map[j["tag"]] }}</small></p>
-              </div>
-            </div>
-        {% endfor %}
-        </div>
-    {% endfor %}
-    </p> -->
 </body>
 
 </html>
