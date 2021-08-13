@@ -25,3 +25,8 @@ then, run the program:
 $ python app.py
 ```
 Open the browser and go to `localhost:5000` to see the running program.
+
+## Exporting votes
+```
+$ mongoexport --db ner_corpus --collection sentences --out <xyz.json> --jsonArray --pretty
+```
